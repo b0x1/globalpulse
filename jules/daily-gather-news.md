@@ -22,16 +22,18 @@ Read `AGENTS.md` and `src/data/news-sources.yaml` before starting.
    - ~20–25% French
    - ~20–25% Chinese
 3. Prefer distinct countries; avoid flooding one outlet or one country.
-4. Skip duplicates of stories already in `src/content/news/` (same topic + source + day).
+4. Skip duplicates of stories already in `src/content/news/YYYY-MM-DD/` (same topic + source + day).
 5. Prefer substantive local/national news over celebrity fluff, ads, or pure opinion columns.
 
 ## File format
 
-Create one file per story under `src/content/news/`:
+Create one file per story under that day’s folder:
 
 ```text
-src/content/news/YYYY-MM-DD-<short-slug>.md
+src/content/news/YYYY-MM-DD/<short-slug>.md
 ```
+
+Example: `src/content/news/2026-07-18/lemonde-taxe-logements-vacants.md`
 
 Frontmatter must match `src/content.config.ts`:
 

@@ -8,13 +8,13 @@ Astro site that aggregates news from different regions of the world, from local 
 - **Language of the land:** headlines and body text should be in that country’s local language (one of the four above), not translations into a single default language.
 - **Landing (`/`):** list of news (title + short description when present), sectioned by **continent**, then **country**. Content comes from Markdown in `src/content/news/`.
 - **Archive (`/archive`):** list of dates; `/archive/[date]` shows that day’s headlines.
-- **Article (`/news/[id]`):** full Markdown story.
+- **Article (`/news/[...id]`):** full Markdown story.
 - Prefer a clean scaffold over sample/filler content unless the user asks for examples.
 - Current visual direction is good — preserve the existing look and feel unless asked to redesign.
 
 ## Content
 
-Stories live in `src/content/news/*.md`. Schema is in `src/content.config.ts`. Helpers for grouping and archive dates are in `src/lib/news.ts`.
+Stories live in `src/content/news/YYYY-MM-DD/<slug>.md`. Schema is in `src/content.config.ts`. Helpers for grouping and archive dates are in `src/lib/news.ts`.
 
 ## News gathering
 
