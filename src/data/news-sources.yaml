@@ -323,10 +323,26 @@
 
 - id: rts-senegal
   name: RTS Sénégal
-  url: https://rts.sn/
+  url: https://www.rts.sn/
   language: fr
   languageName: French
   country: Senegal
+  continent: Africa
+
+- id: fraternite-matin
+  name: Fraternité Matin
+  url: https://www.fratmat.info/
+  language: fr
+  languageName: French
+  country: Côte d'Ivoire
+  continent: Africa
+
+- id: cameroon-tribune
+  name: Cameroon Tribune
+  url: https://www.cameroon-tribune.cm/
+  language: fr
+  languageName: French
+  country: Cameroon
   continent: Africa
 
 # --- Chinese ---
