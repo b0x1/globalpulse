@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate, getPublishedNews } from '../../lib/news';
+import { withBase } from '../../lib/paths';
 
 export async function getStaticPaths() {
 	const news = await getPublishedNews();
@@ -18,7 +19,7 @@ const { title, description, date, country, continent, language, languageName, so
 ---
 
 <BaseLayout title={title} description={description ?? title}>
-	<a class="back-link" href="/">← Today</a>
+	<a class="back-link" href={withBase()}>← Today</a>
 	<article>
 		<header class="article-header">
 			<h1 lang={language}>{title}</h1>

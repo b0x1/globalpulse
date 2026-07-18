@@ -6,6 +6,7 @@ import {
 	getPublishedNews,
 	groupByRegion,
 } from '../../lib/news';
+import { withBase } from '../../lib/paths';
 
 export async function getStaticPaths() {
 	const news = await getPublishedNews();
@@ -22,7 +23,7 @@ const label = news[0] ? formatDate(news[0].data.date) : dateParam;
 ---
 
 <BaseLayout title={label} description={`Headlines from ${label}.`}>
-	<a class="back-link" href="/archive">← All dates</a>
+	<a class="back-link" href={withBase('archive')}>← All dates</a>
 	<p class="lede">{label}</p>
 
 	{
@@ -40,7 +41,7 @@ const label = news[0] ? formatDate(news[0].data.date) : dateParam;
 							{items.map((entry) => (
 								<li class="news-item" lang={entry.data.language}>
 									<h4 class="news-item__title">
-										<a href={`/news/${entry.id}`}>{entry.data.title}</a>
+										<a href={withBase(`news/${entry.id}`)}>{entry.data.title}</a>
 									</h4>
 									{entry.data.description && (
 										<p class="news-item__desc">{entry.data.description}</p>
