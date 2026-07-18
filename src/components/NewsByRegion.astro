@@ -1,0 +1,71 @@
+---
+import { formatDate, type ContinentGroup, type NewsEntry } from '../lib/news';
+import { withBase } from '../lib/paths';
+
+interface Props {
+	regions: ContinentGroup[];
+	/** Show the story date in meta (landing); hide on single-day archive. */
+	showDate?: boolean;
+	empty?: string;
+	idPrefix?: string;
+}
+
+const {
+	regions,
+	showDate = false,
+	empty = 'No stories yet.',
+	idPrefix = 'region',
+} = Astro.props;
+
+function attrs(entry: NewsEntry) {
+	return {
+		'data-language': entry.data.languageName,
+		'data-continent': entry.data.continent,
+		'data-country': entry.data.country,
+		'data-source': entry.data.source,
+	};
+}
+---
+
+{
+	regions.length === 0 ? (
+		<p class="empty">{empty}</p>
+	) : (
+		<div data-news-feed>
+			{regions.map(({ continent, countries }) => (
+				<section class="continent" aria-labelledby={`${idPrefix}-${continent}`}>
+					<h2 class="continent__title" id={`${idPrefix}-${continent}`}>
+						{continent}
+					</h2>
+					{countries.map(({ country, items }) => (
+						<section
+							class="country"
+							aria-labelledby={`${idPrefix}-${continent}-${country}`}
+						>
+							<h3 class="country__title" id={`${idPrefix}-${continent}-${country}`}>
+								{country}
+							</h3>
+							<ul class="news-list">
+								{items.map((entry) => (
+									<li class="news-item" lang={entry.data.language} {...attrs(entry)}>
+										<h4 class="news-item__title">
+											<a href={withBase(`news/${entry.id}`)}>{entry.data.title}</a>
+										</h4>
+										{entry.data.description && (
+											<p class="news-item__desc">{entry.data.description}</p>
+										)}
+										<p class="news-item__meta">
+											{showDate && <span>{formatDate(entry.data.date)}</span>}
+											<span>{entry.data.languageName}</span>
+											<span>{entry.data.source}</span>
+										</p>
+									</li>
+								))}
+							</ul>
+						</section>
+					))}
+				</section>
+			))}
+		</div>
+	)
+}

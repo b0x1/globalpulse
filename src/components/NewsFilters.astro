@@ -1,0 +1,171 @@
+---
+import type { NewsFilterOptions } from '../lib/news';
+
+interface Props {
+	options: NewsFilterOptions;
+}
+
+const { options } = Astro.props;
+
+const groups = [
+	{ key: 'language', label: 'Language', values: options.languages },
+	{ key: 'continent', label: 'Continent', values: options.continents },
+	{ key: 'country', label: 'Country', values: options.countries },
+	{ key: 'source', label: 'Source', values: options.sources },
+] as const;
+---
+
+{
+	groups.some((g) => g.values.length > 0) && (
+		<div class="filter-bar" data-news-filters role="search" aria-label="Filter headlines">
+			{groups.map(
+				({ key, label, values }) =>
+					values.length > 0 && (
+						<div class="filter-group" data-filter-group={key}>
+							<span class="filter-group__label" id={`filter-${key}-label`}>
+								{label}
+							</span>
+							<div
+								class="filter-group__options"
+								role="group"
+								aria-labelledby={`filter-${key}-label`}
+								data-filter={key}
+							>
+								{values.map((value) => (
+									<button
+										type="button"
+										class="filter-chip"
+										data-value={value}
+										aria-pressed="false"
+									>
+										{value}
+									</button>
+								))}
+							</div>
+						</div>
+					),
+			)}
+			<p class="filter-empty" data-filter-empty hidden>
+				No stories match these filters.
+			</p>
+		</div>
+	)
+}
+
+<script>
+	const DIMENSIONS = ['language', 'continent', 'country', 'source'] as const;
+	type Dimension = (typeof DIMENSIONS)[number];
+
+	function initNewsFilters() {
+		const bar = document.querySelector('[data-news-filters]');
+		const feed = document.querySelector('[data-news-feed]');
+		if (!(bar instanceof HTMLElement) || !(feed instanceof HTMLElement)) return;
+		if (bar.dataset.bound === 'true') return;
+		bar.dataset.bound = 'true';
+
+		const empty = bar.querySelector('[data-filter-empty]');
+		const items = [...feed.querySelectorAll<HTMLElement>('.news-item')];
+
+		function itemValue(item: HTMLElement, key: Dimension): string {
+			return item.dataset[key] ?? '';
+		}
+
+		function selectedFor(key: Dimension): Set<string> {
+			const group = bar.querySelector(`[data-filter="${key}"]`);
+			if (!group) return new Set();
+			return new Set(
+				[...group.querySelectorAll('.filter-chip[aria-pressed="true"]:not([hidden])')].map(
+					(el) => (el as HTMLElement).dataset.value ?? '',
+				),
+			);
+		}
+
+		function matchesFilters(item: HTMLElement, active: Record<Dimension, Set<string>>): boolean {
+			return DIMENSIONS.every(
+				(key) => active[key].size === 0 || active[key].has(itemValue(item, key)),
+			);
+		}
+
+		function pruneSelections() {
+			let changed = false;
+			for (const key of DIMENSIONS) {
+				const others = Object.fromEntries(
+					DIMENSIONS.map((d) => [d, d === key ? new Set<string>() : selectedFor(d)]),
+				) as Record<Dimension, Set<string>>;
+
+				const available = new Set(
+					items.filter((item) => matchesFilters(item, others)).map((item) => itemValue(item, key)),
+				);
+
+				const group = bar.querySelector(`[data-filter="${key}"]`);
+				if (!group) continue;
+
+				for (const chip of group.querySelectorAll<HTMLElement>('.filter-chip')) {
+					const value = chip.dataset.value ?? '';
+					const isAvailable = available.has(value);
+					chip.hidden = !isAvailable;
+					if (!isAvailable && chip.getAttribute('aria-pressed') === 'true') {
+						chip.setAttribute('aria-pressed', 'false');
+						changed = true;
+					}
+				}
+
+				const wrap = bar.querySelector(`[data-filter-group="${key}"]`);
+				if (wrap instanceof HTMLElement) {
+					wrap.hidden = available.size === 0;
+				}
+			}
+			return changed;
+		}
+
+		function applyFeed(active: Record<Dimension, Set<string>>) {
+			let visibleCount = 0;
+
+			for (const item of items) {
+				const match = matchesFilters(item, active);
+				item.hidden = !match;
+				if (match) visibleCount += 1;
+			}
+
+			for (const country of feed.querySelectorAll<HTMLElement>('.country')) {
+				const any = [...country.querySelectorAll('.news-item')].some((el) => !el.hidden);
+				country.hidden = !any;
+			}
+
+			for (const continent of feed.querySelectorAll<HTMLElement>('.continent')) {
+				const any = [...continent.querySelectorAll('.country')].some((el) => !el.hidden);
+				continent.hidden = !any;
+			}
+
+			if (empty instanceof HTMLElement) {
+				empty.hidden = visibleCount > 0;
+			}
+		}
+
+		function apply() {
+			do {
+				/* drop selections that no longer exist in the pruned facet */
+			} while (pruneSelections());
+
+			const active = Object.fromEntries(
+				DIMENSIONS.map((key) => [key, selectedFor(key)]),
+			) as Record<Dimension, Set<string>>;
+			applyFeed(active);
+		}
+
+		bar.addEventListener('click', (event) => {
+			const target = event.target;
+			if (!(target instanceof HTMLElement)) return;
+			const chip = target.closest('.filter-chip');
+			if (!(chip instanceof HTMLElement) || !bar.contains(chip) || chip.hidden) return;
+			const pressed = chip.getAttribute('aria-pressed') === 'true';
+			chip.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+			apply();
+		});
+
+		apply();
+	}
+
+	initNewsFilters();
+	document.addEventListener('astro:page-load', initNewsFilters);
+</script>

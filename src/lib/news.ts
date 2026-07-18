@@ -74,6 +74,35 @@ export type ArchiveDay = {
 	count: number;
 };
 
+export type NewsFilterOptions = {
+	languages: string[];
+	continents: string[];
+	countries: string[];
+	sources: string[];
+};
+
+/** Distinct filter values present in the given entries. */
+export function collectFilterOptions(entries: NewsEntry[]): NewsFilterOptions {
+	const languages = new Set<string>();
+	const continents = new Set<string>();
+	const countries = new Set<string>();
+	const sources = new Set<string>();
+
+	for (const entry of entries) {
+		languages.add(entry.data.languageName);
+		continents.add(entry.data.continent);
+		countries.add(entry.data.country);
+		sources.add(entry.data.source);
+	}
+
+	return {
+		languages: [...languages].sort((a, b) => a.localeCompare(b)),
+		continents: CONTINENT_ORDER.filter((c) => continents.has(c)),
+		countries: [...countries].sort((a, b) => a.localeCompare(b)),
+		sources: [...sources].sort((a, b) => a.localeCompare(b)),
+	};
+}
+
 /** Unique dates newest-first, with article counts. */
 export function buildArchive(entries: NewsEntry[]): ArchiveDay[] {
 	const counts = new Map<string, { date: Date; count: number }>();

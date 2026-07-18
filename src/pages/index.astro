@@ -1,50 +1,23 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { formatDate, getPublishedNews, groupByRegion } from '../lib/news';
-import { withBase } from '../lib/paths';
+import NewsByRegion from '../components/NewsByRegion.astro';
+import NewsFilters from '../components/NewsFilters.astro';
+import { collectFilterOptions, getPublishedNews, groupByRegion } from '../lib/news';
 
 const news = await getPublishedNews();
 const regions = groupByRegion(news);
+const filters = collectFilterOptions(news);
 ---
 
 <BaseLayout title="GlobalPulse">
 	<p class="lede">News in English, German, Chinese, and French — from the language of the land.</p>
 
-	{
-		regions.length === 0 ? (
-			<p class="empty">No stories yet. Add Markdown files under <code>src/content/news/</code>.</p>
-		) : (
-			regions.map(({ continent, countries }) => (
-				<section class="continent" aria-labelledby={`continent-${continent}`}>
-					<h2 class="continent__title" id={`continent-${continent}`}>
-						{continent}
-					</h2>
-					{countries.map(({ country, items }) => (
-						<section class="country" aria-labelledby={`country-${continent}-${country}`}>
-							<h3 class="country__title" id={`country-${continent}-${country}`}>
-								{country}
-							</h3>
-							<ul class="news-list">
-								{items.map((entry) => (
-									<li class="news-item" lang={entry.data.language}>
-										<h4 class="news-item__title">
-											<a href={withBase(`news/${entry.id}`)}>{entry.data.title}</a>
-										</h4>
-										{entry.data.description && (
-											<p class="news-item__desc">{entry.data.description}</p>
-										)}
-										<p class="news-item__meta">
-											<span>{formatDate(entry.data.date)}</span>
-											<span>{entry.data.languageName}</span>
-											<span>{entry.data.source}</span>
-										</p>
-									</li>
-								))}
-							</ul>
-						</section>
-					))}
-				</section>
-			))
-		)
-	}
+	{regions.length > 0 && <NewsFilters options={filters} />}
+
+	<NewsByRegion
+		regions={regions}
+		showDate
+		empty="No stories yet. Add Markdown files under src/content/news/YYYY-MM-DD/."
+		idPrefix="continent"
+	/>
 </BaseLayout>
