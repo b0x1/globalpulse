@@ -1,0 +1,404 @@
+# News sources for GlobalPulse agents.
+# Prefer the local-language edition of each outlet (en | de | zh | fr).
+# When gathering stories: use title + optional short description in the source language;
+# attribute `source` / `sourceUrl` from this list.
+
+- id: bbc-news
+  name: BBC News
+  url: https://www.bbc.com/news
+  language: en
+  languageName: English
+  country: United Kingdom
+  continent: Europe
+
+- id: the-guardian
+  name: The Guardian
+  url: https://www.theguardian.com/uk
+  language: en
+  languageName: English
+  country: United Kingdom
+  continent: Europe
+
+- id: reuters
+  name: Reuters
+  url: https://www.reuters.com/
+  language: en
+  languageName: English
+  country: United Kingdom
+  continent: Europe
+
+- id: nytimes
+  name: The New York Times
+  url: https://www.nytimes.com/
+  language: en
+  languageName: English
+  country: United States
+  continent: North America
+
+- id: washington-post
+  name: The Washington Post
+  url: https://www.washingtonpost.com/
+  language: en
+  languageName: English
+  country: United States
+  continent: North America
+
+- id: npr
+  name: NPR
+  url: https://www.npr.org/
+  language: en
+  languageName: English
+  country: United States
+  continent: North America
+
+- id: ap-news
+  name: Associated Press
+  url: https://apnews.com/
+  language: en
+  languageName: English
+  country: United States
+  continent: North America
+
+- id: cbc-news
+  name: CBC News
+  url: https://www.cbc.ca/news
+  language: en
+  languageName: English
+  country: Canada
+  continent: North America
+
+- id: globe-and-mail
+  name: The Globe and Mail
+  url: https://www.theglobeandmail.com/
+  language: en
+  languageName: English
+  country: Canada
+  continent: North America
+
+- id: abc-australia
+  name: ABC News
+  url: https://www.abc.net.au/news
+  language: en
+  languageName: English
+  country: Australia
+  continent: Oceania
+
+- id: the-age
+  name: The Age
+  url: https://www.theage.com.au/
+  language: en
+  languageName: English
+  country: Australia
+  continent: Oceania
+
+- id: rnz
+  name: RNZ
+  url: https://www.rnz.co.nz/
+  language: en
+  languageName: English
+  country: New Zealand
+  continent: Oceania
+
+- id: rte
+  name: RTÉ News
+  url: https://www.rte.ie/news/
+  language: en
+  languageName: English
+  country: Ireland
+  continent: Europe
+
+- id: news24
+  name: News24
+  url: https://www.news24.com/
+  language: en
+  languageName: English
+  country: South Africa
+  continent: Africa
+
+- id: daily-nation
+  name: Daily Nation
+  url: https://nation.africa/
+  language: en
+  languageName: English
+  country: Kenya
+  continent: Africa
+
+- id: punch
+  name: The Punch
+  url: https://punchng.com/
+  language: en
+  languageName: English
+  country: Nigeria
+  continent: Africa
+
+- id: straits-times
+  name: The Straits Times
+  url: https://www.straitstimes.com/
+  language: en
+  languageName: English
+  country: Singapore
+  continent: Asia
+
+- id: the-hindu
+  name: The Hindu
+  url: https://www.thehindu.com/
+  language: en
+  languageName: English
+  country: India
+  continent: Asia
+
+# --- German ---
+
+- id: tagesschau
+  name: tagesschau
+  url: https://www.tagesschau.de/
+  language: de
+  languageName: German
+  country: Germany
+  continent: Europe
+
+- id: spiegel
+  name: Der Spiegel
+  url: https://www.spiegel.de/
+  language: de
+  languageName: German
+  country: Germany
+  continent: Europe
+
+- id: sueddeutsche
+  name: Süddeutsche Zeitung
+  url: https://www.sueddeutsche.de/
+  language: de
+  languageName: German
+  country: Germany
+  continent: Europe
+
+- id: zeit
+  name: Die Zeit
+  url: https://www.zeit.de/
+  language: de
+  languageName: German
+  country: Germany
+  continent: Europe
+
+- id: faz
+  name: Frankfurter Allgemeine Zeitung
+  url: https://www.faz.net/
+  language: de
+  languageName: German
+  country: Germany
+  continent: Europe
+
+- id: der-standard
+  name: Der Standard
+  url: https://www.derstandard.at/
+  language: de
+  languageName: German
+  country: Austria
+  continent: Europe
+
+- id: orf
+  name: ORF News
+  url: https://orf.at/
+  language: de
+  languageName: German
+  country: Austria
+  continent: Europe
+
+- id: nzz
+  name: Neue Zürcher Zeitung
+  url: https://www.nzz.ch/
+  language: de
+  languageName: German
+  country: Switzerland
+  continent: Europe
+
+- id: srf
+  name: SRF News
+  url: https://www.srf.ch/news
+  language: de
+  languageName: German
+  country: Switzerland
+  continent: Europe
+
+# --- French ---
+
+- id: le-monde
+  name: Le Monde
+  url: https://www.lemonde.fr/
+  language: fr
+  languageName: French
+  country: France
+  continent: Europe
+
+- id: le-figaro
+  name: Le Figaro
+  url: https://www.lefigaro.fr/
+  language: fr
+  languageName: French
+  country: France
+  continent: Europe
+
+- id: liberation
+  name: Libération
+  url: https://www.liberation.fr/
+  language: fr
+  languageName: French
+  country: France
+  continent: Europe
+
+- id: france24
+  name: France 24
+  url: https://www.france24.com/fr/
+  language: fr
+  languageName: French
+  country: France
+  continent: Europe
+
+- id: franceinfo
+  name: franceinfo
+  url: https://www.francetvinfo.fr/
+  language: fr
+  languageName: French
+  country: France
+  continent: Europe
+
+- id: le-soir
+  name: Le Soir
+  url: https://www.lesoir.be/
+  language: fr
+  languageName: French
+  country: Belgium
+  continent: Europe
+
+- id: rtbf
+  name: RTBF Info
+  url: https://www.rtbf.be/info
+  language: fr
+  languageName: French
+  country: Belgium
+  continent: Europe
+
+- id: le-temps
+  name: Le Temps
+  url: https://www.letemps.ch/
+  language: fr
+  languageName: French
+  country: Switzerland
+  continent: Europe
+
+- id: radio-canada
+  name: Radio-Canada
+  url: https://ici.radio-canada.ca/
+  language: fr
+  languageName: French
+  country: Canada
+  continent: North America
+
+- id: la-presse
+  name: La Presse
+  url: https://www.lapresse.ca/
+  language: fr
+  languageName: French
+  country: Canada
+  continent: North America
+
+- id: lemonde-afrique
+  name: Le Monde Afrique
+  url: https://www.lemonde.fr/afrique/
+  language: fr
+  languageName: French
+  country: France
+  continent: Africa
+  notes: Pan-African French desk; prefer local African FR outlets when available.
+
+- id: jeuneafrica
+  name: Jeune Afrique
+  url: https://www.jeuneafrique.com/
+  language: fr
+  languageName: French
+  country: France
+  continent: Africa
+  notes: Pan-African; use for Francophone Africa coverage.
+
+- id: rts-senegal
+  name: RTS Sénégal
+  url: https://rts.sn/
+  language: fr
+  languageName: French
+  country: Senegal
+  continent: Africa
+
+# --- Chinese ---
+
+- id: xinhua
+  name: 新华网
+  url: https://www.news.cn/
+  language: zh
+  languageName: Chinese
+  country: China
+  continent: Asia
+
+- id: people-cn
+  name: 人民网
+  url: https://www.people.com.cn/
+  language: zh
+  languageName: Chinese
+  country: China
+  continent: Asia
+
+- id: cctv-news
+  name: 央视网
+  url: https://news.cctv.com/
+  language: zh
+  languageName: Chinese
+  country: China
+  continent: Asia
+
+- id: thepaper
+  name: 澎湃新闻
+  url: https://www.thepaper.cn/
+  language: zh
+  languageName: Chinese
+  country: China
+  continent: Asia
+
+- id: caixin
+  name: 财新
+  url: https://www.caixin.com/
+  language: zh
+  languageName: Chinese
+  country: China
+  continent: Asia
+
+- id: lianhe-zaobao
+  name: 联合早报
+  url: https://www.zaobao.com.sg/
+  language: zh
+  languageName: Chinese
+  country: Singapore
+  continent: Asia
+
+- id: udn
+  name: 聯合新聞網
+  url: https://udn.com/news/index
+  language: zh
+  languageName: Chinese
+  country: Taiwan
+  continent: Asia
+
+- id: ltn
+  name: 自由時報
+  url: https://www.ltn.com.tw/
+  language: zh
+  languageName: Chinese
+  country: Taiwan
+  continent: Asia
+
+- id: mingpao
+  name: 明報
+  url: https://news.mingpao.com/
+  language: zh
+  languageName: Chinese
+  country: Hong Kong
+  continent: Asia
