@@ -25,7 +25,7 @@ country: France
 language: fr          # en | de | zh | fr
 languageName: French  # English | German | Chinese | French
 source: Le Monde
-sourceUrl: https://www.lemonde.fr/
+sourceUrl: https://www.lemonde.fr/…/article-permalink.html
 ---
 
 Body text…

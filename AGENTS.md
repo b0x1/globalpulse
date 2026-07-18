@@ -25,7 +25,8 @@ Rules for agents:
 - Only use sources from that file (or ask before adding a new outlet).
 - Match `language` / `languageName` / `country` / `continent` on each story to the chosen source.
 - Prefer the local-language homepage/section listed (`en`, `de`, `zh`, `fr`) — not a translated international edition.
-- Attribute `source` and `sourceUrl` from the list entry.
+- Attribute `source` from the list entry’s `name`.
+- Set `sourceUrl` to the **concrete article URL** (the specific story page), not the outlet homepage from the list.
 - Cover multiple continents when possible; do not over-sample a single country.
 - **Daily volume:** fewer than **100** stories per day (hard max 99; target 40–80).
 

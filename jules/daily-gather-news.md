@@ -47,7 +47,7 @@ country: France
 language: fr
 languageName: French
 source: Le Monde
-sourceUrl: https://www.lemonde.fr/
+sourceUrl: https://www.lemonde.fr/politique/article/2026/07/18/example-slug_1234567_1234.html
 ---
 
 Short body (1–3 paragraphs) in the source language. Paraphrase or quote briefly;
@@ -55,11 +55,13 @@ do not paste an entire paywalled article.
 ```
 
 - `language` / `languageName` / `country` / `continent` must match the chosen entry in `news-sources.yaml`.
-- `source` = outlet `name`; `sourceUrl` = article URL when known, otherwise the outlet homepage URL from the list.
+- `source` = outlet `name` from the list.
+- `sourceUrl` = the **concrete URL of that article** (permalink to the story). Do **not** use the outlet homepage from `news-sources.yaml` as a stand-in.
 
 ## Acceptance checklist
 
 - [ ] Story count for today is **&lt; 100**
+- [ ] Every story has a concrete article `sourceUrl` (not just the outlet homepage)
 - [ ] Every story validates against the content schema
 - [ ] `npm run build` succeeds
 - [ ] No sample/filler content; no new languages; no sources outside the YAML list

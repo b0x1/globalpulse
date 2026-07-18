@@ -1,7 +1,8 @@
 # News sources for GlobalPulse agents.
 # Prefer the local-language edition of each outlet (en | de | zh | fr).
 # When gathering stories: use title + optional short description in the source language;
-# attribute `source` / `sourceUrl` from this list.
+# attribute `source` from this list’s `name`. Set `sourceUrl` to the concrete article URL,
+# not the outlet `url` below.
 
 - id: bbc-news
   name: BBC News
