@@ -41,5 +41,5 @@ Do **not** gather daily news in this task.
 
 ## Out of scope
 
-- Do not add sample stories under `src/content/news/`.
+- Do not add sample stories under `src/content/news/YYYY-MM-DD/`.
 - Do not change site UI, schema, or routing unless required to keep the source list usable — and call that out explicitly in the PR.

@@ -9,11 +9,11 @@ Astro scaffold for news in English, German, Chinese, and French — grouped by c
 | `/` | Landing — headlines by continent → country |
 | `/archive` | Date list |
 | `/archive/[date]` | Headlines for one day |
-| `/news/[id]` | Article |
+| `/news/[...id]` | Article |
 
 ## Add a story
 
-Create `src/content/news/your-slug.md`:
+Create `src/content/news/YYYY-MM-DD/your-slug.md`:
 
 ```yaml
 ---
