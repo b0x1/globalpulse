@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { buildArchive, formatDate, getPublishedNews } from '../../lib/news';
+
+const archive = buildArchive(await getPublishedNews());
+---
+
+<BaseLayout
+	title="Archive"
+	description="Browse GlobalPulse headlines by date."
+>
+	<p class="lede">Archive</p>
+	<p class="archive-intro">All dates with published headlines.</p>
+
+	{
+		archive.length === 0 ? (
+			<p class="empty">No dates yet.</p>
+		) : (
+			<ul class="archive-list">
+				{archive.map(({ key, date, count }) => (
+					<li>
+						<a href={`/archive/${key}`}>
+							<span>{formatDate(date)}</span>
+							<span class="archive-list__count">
+								{count} {count === 1 ? 'story' : 'stories'}
+							</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		)
+	}
+</BaseLayout>

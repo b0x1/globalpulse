@@ -1,0 +1,44 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, getPublishedNews } from '../../lib/news';
+
+export async function getStaticPaths() {
+	const news = await getPublishedNews();
+	return news.map((entry) => ({
+		params: { id: entry.id },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, description, date, country, continent, language, languageName, source, sourceUrl } =
+	entry.data;
+---
+
+<BaseLayout title={title} description={description ?? title}>
+	<a class="back-link" href="/">← Today</a>
+	<article>
+		<header class="article-header">
+			<h1 lang={language}>{title}</h1>
+			<p class="article-meta">
+				<time datetime={date.toISOString()}>{formatDate(date)}</time>
+				<span>{country}, {continent}</span>
+				<span>{languageName}</span>
+				{
+					sourceUrl ? (
+						<a href={sourceUrl} rel="noopener noreferrer">
+							{source}
+						</a>
+					) : (
+						<span>{source}</span>
+					)
+				}
+			</p>
+		</header>
+		<div class="article-body" lang={language}>
+			<Content />
+		</div>
+	</article>
+</BaseLayout>

@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+	dateKey,
+	formatDate,
+	getPublishedNews,
+	groupByRegion,
+} from '../../lib/news';
+
+export async function getStaticPaths() {
+	const news = await getPublishedNews();
+	const keys = [...new Set(news.map((entry) => dateKey(entry.data.date)))];
+	return keys.map((date) => ({ params: { date } }));
+}
+
+const { date: dateParam } = Astro.params;
+const news = (await getPublishedNews()).filter(
+	(entry) => dateKey(entry.data.date) === dateParam,
+);
+const regions = groupByRegion(news);
+const label = news[0] ? formatDate(news[0].data.date) : dateParam;
+---
+
+<BaseLayout title={label} description={`Headlines from ${label}.`}>
+	<a class="back-link" href="/archive">← All dates</a>
+	<p class="lede">{label}</p>
+
+	{
+		regions.map(({ continent, countries }) => (
+			<section class="continent" aria-labelledby={`d-continent-${continent}`}>
+				<h2 class="continent__title" id={`d-continent-${continent}`}>
+					{continent}
+				</h2>
+				{countries.map(({ country, items }) => (
+					<section class="country" aria-labelledby={`d-country-${continent}-${country}`}>
+						<h3 class="country__title" id={`d-country-${continent}-${country}`}>
+							{country}
+						</h3>
+						<ul class="news-list">
+							{items.map((entry) => (
+								<li class="news-item" lang={entry.data.language}>
+									<h4 class="news-item__title">
+										<a href={`/news/${entry.id}`}>{entry.data.title}</a>
+									</h4>
+									{entry.data.description && (
+										<p class="news-item__desc">{entry.data.description}</p>
+									)}
+									<p class="news-item__meta">
+										<span>{entry.data.languageName}</span>
+										<span>{entry.data.source}</span>
+									</p>
+								</li>
+							))}
+						</ul>
+					</section>
+				))}
+			</section>
+		))
+	}
+</BaseLayout>
