@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { buildArchive, formatDate, getPublishedNews } from '../../lib/news';
+import { withBase } from '../../lib/paths';
 
 const archive = buildArchive(await getPublishedNews());
 ---
@@ -19,7 +20,7 @@ const archive = buildArchive(await getPublishedNews());
 			<ul class="archive-list">
 				{archive.map(({ key, date, count }) => (
 					<li>
-						<a href={`/archive/${key}`}>
+						<a href={withBase(`archive/${key}`)}>
 							<span>{formatDate(date)}</span>
 							<span class="archive-list__count">
 								{count} {count === 1 ? 'story' : 'stories'}

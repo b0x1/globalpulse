@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { formatDate, getPublishedNews, groupByRegion } from '../lib/news';
+import { withBase } from '../lib/paths';
 
 const news = await getPublishedNews();
 const regions = groupByRegion(news);
@@ -27,7 +28,7 @@ const regions = groupByRegion(news);
 								{items.map((entry) => (
 									<li class="news-item" lang={entry.data.language}>
 										<h4 class="news-item__title">
-											<a href={`/news/${entry.id}`}>{entry.data.title}</a>
+											<a href={withBase(`news/${entry.id}`)}>{entry.data.title}</a>
 										</h4>
 										{entry.data.description && (
 											<p class="news-item__desc">{entry.data.description}</p>
