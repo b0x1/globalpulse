@@ -98,6 +98,12 @@ body::before {
 	color: var(--accent);
 }
 
+.site-nav__github {
+	display: inline-flex;
+	align-self: center;
+	line-height: 0;
+}
+
 main {
 	flex: 1;
 	animation: rise 0.8s ease 0.08s both;
@@ -121,6 +127,11 @@ main {
 }
 
 .site-footer__credit {
+	font-size: 0.8rem;
+	text-align: center;
+}
+
+.site-footer__legal {
 	font-size: 0.8rem;
 	text-align: center;
 }
