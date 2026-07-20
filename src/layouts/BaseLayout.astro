@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { withBase } from '../lib/paths';
+import { siteContact, siteTagline } from '../lib/site';
 
 interface Props {
 	title?: string;
@@ -9,7 +10,7 @@ interface Props {
 
 const {
 	title = 'GlobalPulse',
-	description = 'News in English, German, Chinese, and French — from the language of the land.',
+	description = siteTagline,
 } = Astro.props;
 
 const pageTitle = title === 'GlobalPulse' ? title : `${title} · GlobalPulse`;
@@ -45,7 +46,18 @@ const pageTitle = title === 'GlobalPulse' ? title : `${title} · GlobalPulse`;
 				<slot />
 			</main>
 			<footer class="site-footer">
-				<p>English, German, Chinese, French — one pulse around the globe.</p>
+				<p>
+					Automated news aggregation from around the world. Content on this site is compiled
+					automatically from third-party sources and is not independently verified. We make no
+					representation or warranty as to the accuracy, completeness, or timeliness of any
+					information shown here. Links to external websites are provided for convenience only; we
+					do not control those sites and accept no responsibility or liability for their content or
+					for any loss or damage arising from your use of this site or of linked third-party
+					material.
+				</p>
+				<p class="site-footer__credit">
+					© {siteContact.name}, {siteContact.location}
+				</p>
 			</footer>
 		</div>
 	</body>

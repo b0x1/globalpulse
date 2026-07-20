@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsByRegion from '../components/NewsByRegion.astro';
 import NewsFilters from '../components/NewsFilters.astro';
 import { collectFilterOptions, getPublishedNews, groupByRegion } from '../lib/news';
+import { siteTagline } from '../lib/site';
 
 const news = await getPublishedNews();
 const regions = groupByRegion(news);
@@ -10,7 +11,7 @@ const filters = collectFilterOptions(news);
 ---
 
 <BaseLayout title="GlobalPulse">
-	<p class="lede">News in English, German, Chinese, and French — from the language of the land.</p>
+	<p class="lede lede--tagline">{siteTagline}</p>
 
 	{regions.length > 0 && <NewsFilters options={filters} />}
 
