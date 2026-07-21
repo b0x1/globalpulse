@@ -2,10 +2,18 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsByRegion from '../components/NewsByRegion.astro';
 import NewsFilters from '../components/NewsFilters.astro';
-import { collectFilterOptions, getPublishedNews, groupByRegion } from '../lib/news';
+import {
+	collectFilterOptions,
+	dateKey,
+	getPublishedNews,
+	groupByRegion,
+} from '../lib/news';
 import { siteTagline } from '../lib/site';
 
-const news = await getPublishedNews();
+const today = dateKey(new Date());
+const news = (await getPublishedNews()).filter(
+	(entry) => dateKey(entry.data.date) === today,
+);
 const regions = groupByRegion(news);
 const filters = collectFilterOptions(news);
 ---
@@ -18,7 +26,7 @@ const filters = collectFilterOptions(news);
 	<NewsByRegion
 		regions={regions}
 		showDate
-		empty="No stories yet. Add Markdown files under src/content/news/YYYY-MM-DD/."
+		empty="No stories for today yet. Add Markdown files under src/content/news/YYYY-MM-DD/."
 		idPrefix="continent"
 	/>
 </BaseLayout>
