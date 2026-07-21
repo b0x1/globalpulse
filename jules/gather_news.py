@@ -4,6 +4,7 @@ import re
 import urllib.request
 import xml.etree.ElementTree as ET
 import html
+import datetime
 
 # Target counts
 TARGETS = {
@@ -180,6 +181,14 @@ def main():
     sources_by_id = {s['id']: s for s in sources}
     print(f"Loaded {len(sources)} sources.")
 
+    # Dynamically determine today's date
+    today_date = datetime.datetime.now(datetime.timezone.utc).date()
+    yyyy_mm_dd = today_date.strftime("%Y-%m-%d")
+    yyyy_mm_dd_slash = today_date.strftime("%Y/%m/%d")
+    yyyymmdd = today_date.strftime("%Y%m%d")
+    yyyy = today_date.strftime("%Y")
+    print(f"Today's date is calculated as: {yyyy_mm_dd}")
+
     # We will gather articles by language
     gathered = {
         'en': [],
@@ -340,11 +349,11 @@ def main():
         if sid == 'xinhua':
             links = set(re.findall(r'href=\"(https?://www\.news\.cn/[^\"]+c\.html)\"', homepage_html))
         elif sid == 'people-cn':
-            links = set(re.findall(r'href=\"(http://society\.people\.com\.cn/n1/2026/[^\"]+\.html|http://finance\.people\.com\.cn/n1/2026/[^\"]+\.html)\"', homepage_html))
+            links = set(re.findall(rf'href=\"(http://society\.people\.com\.cn/n1/{yyyy}/[^\"]+\.html|http://finance\.people\.com\.cn/n1/{yyyy}/[^\"]+\.html)\"', homepage_html))
         elif sid == 'cctv-news':
-            links = set(re.findall(r'href=\"(https?://news\.cctv\.com/2026/07/20/[^\"]+\.shtml)\"', homepage_html))
+            links = set(re.findall(rf'href=\"(https?://news\.cctv\.com/{yyyy_mm_dd_slash}/[^\"]+\.shtml)\"', homepage_html))
         elif sid == 'lianhe-zaobao':
-            raw_links = set(re.findall(r'href=\"(/news/singapore/story20260720-[^\"]+|/news/china/story20260720-[^\"]+|/news/world/story20260720-[^\"]+)\"', homepage_html))
+            raw_links = set(re.findall(rf'href=\"(/news/singapore/story{yyyymmdd}-[^\"]+|/news/china/story{yyyymmdd}-[^\"]+|/news/world/story{yyyymmdd}-[^\"]+)\"', homepage_html))
             links = ["https://www.zaobao.com.sg" + l for l in raw_links]
         elif sid == 'udn':
             raw_links = set(re.findall(r'href=\"([^\"]*story\d+/\d+)\"', homepage_html))
@@ -352,7 +361,7 @@ def main():
         elif sid == 'ltn':
             links = set(re.findall(r'href=\"(https://news\.ltn\.com\.tw/news/[a-z]+/breakingnews/\d+)\"', homepage_html))
         elif sid == 'caixin':
-            links = set(re.findall(r'href=\"(https://[a-z]+\.caixin\.com/2026-07-20/[^\"]+\.html)\"', homepage_html))
+            links = set(re.findall(rf'href=\"(https://[a-z]+\.caixin\.com/{yyyy_mm_dd}/[^\"]+\.html)\"', homepage_html))
 
         print(f"Found {len(links)} links for {sid}.")
         count = 0
@@ -369,6 +378,10 @@ def main():
                     title = title.split("—")[0].strip()
                 elif "_" in title:
                     title = title.split("_")[0].strip()
+
+                if not title.strip():
+                    print("    Skipping Chinese article with empty title.")
+                    continue
 
                 d_match = re.search(r'<meta name=\"description\" content=\"(.*?)\"', art_html)
                 desc = clean_html(d_match.group(1)) if d_match else ""
@@ -390,7 +403,7 @@ def main():
                     break
 
     # Save to Markdown
-    out_dir = 'src/content/news/2026-07-20'
+    out_dir = f'src/content/news/{yyyy_mm_dd}'
     os.makedirs(out_dir, exist_ok=True)
 
     # Clean output dir first to avoid stale/partially broken files
@@ -414,7 +427,7 @@ def main():
                 "---",
                 f'title: "{title_escaped}"',
                 f'description: "{desc_escaped}"',
-                "date: 2026-07-20",
+                f"date: {yyyy_mm_dd}",
                 f"continent: {src_info['continent']}",
                 f"country: {src_info['country']}",
                 f"language: {lang}",
