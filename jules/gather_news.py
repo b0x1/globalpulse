@@ -2,7 +2,6 @@ import os
 import sys
 import re
 import urllib.request
-import xml.etree.ElementTree as ET
 import html
 import datetime
 
@@ -14,26 +13,8 @@ TARGETS = {
     'zh': 11
 }
 
-# RSS feeds map
-RSS_FEEDS = {
-    'bbc-news': 'https://feeds.bbci.co.uk/news/world/rss.xml',
-    'the-guardian': 'https://www.theguardian.com/uk/rss',
-    'nytimes': 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
-    'cbc-news': 'https://rss.cbc.ca/lineup/topstories.xml',
-    'abc-australia': 'https://www.abc.net.au/news/feed/51120/rss.xml',
-    'rnz': 'https://www.rnz.co.nz/rss/news.xml',
-    'rte': 'https://www.rte.ie/news/rss/news-headlines.xml',
-    'tagesschau': 'https://www.tagesschau.de/xml/rss2/',
-    'spiegel': 'https://www.spiegel.de/index.rss',
-    'faz': 'https://www.faz.net/rss/aktuell/',
-    'nzz': 'https://www.nzz.ch/recent.rss',
-    'der-standard': 'https://www.derstandard.at/rss',
-    'le-monde': 'https://www.lemonde.fr/rss/une.xml',
-    'le-figaro': 'https://www.lefigaro.fr/rss/figaro_actualites.xml',
-    'france24': 'https://www.france24.com/fr/rss',
-    'franceinfo': 'https://www.francetvinfo.fr/titres.rss',
-    'le-temps': 'https://www.letemps.ch/feed',
-}
+PER_SOURCE_LIMIT = 3
+
 
 # Parse news-sources.yaml
 def parse_sources(filepath):
@@ -61,6 +42,7 @@ def parse_sources(filepath):
         sources.append(current)
     return sources
 
+
 def clean_html(text):
     if not text:
         return ""
@@ -71,6 +53,7 @@ def clean_html(text):
     # clean extra whitespace
     text = re.sub(r'\s+', ' ', text).strip()
     return text
+
 
 def clean_paragraph_content(text):
     """
@@ -112,6 +95,28 @@ def clean_paragraph_content(text):
 
     return text
 
+
+def strip_title_suffix(title):
+    for sep in (' | ', ' - ', '—', '_'):
+        if sep in title:
+            return title.split(sep)[0].strip()
+    return title
+
+
+def make_article(source_id, title, description, url):
+    desc = description or title
+    desc_p = clean_paragraph_content(desc)
+    if not desc_p:
+        desc_p = title
+    return {
+        'source_id': source_id,
+        'title': title,
+        'description': desc,
+        'url': url,
+        'paragraphs': [desc_p],
+    }
+
+
 def make_slug(source_id, title):
     slug_base = title.lower()
     slug_base = re.sub(r'[^\w\s-]', '', slug_base)
@@ -122,6 +127,7 @@ def make_slug(source_id, title):
     if not slug_words:
         slug_words = "article"
     return f"{source_id}-{slug_words}"
+
 
 def fetch_url(url, timeout=5):
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'})
@@ -134,11 +140,12 @@ def fetch_url(url, timeout=5):
             data = resp.read()
             try:
                 return data.decode(charset, errors='ignore')
-            except:
+            except Exception:
                 return data.decode('utf-8', errors='ignore')
     except Exception as e:
         print(f"Error fetching {url}: {e}", file=sys.stderr)
         return None
+
 
 def parse_rss(xml_str):
     if not xml_str:
@@ -176,237 +183,129 @@ def parse_rss(xml_str):
         print(f"Error parsing RSS items: {e}", file=sys.stderr)
         return []
 
-def main():
-    sources = parse_sources('src/data/news-sources.yaml')
-    sources_by_id = {s['id']: s for s in sources}
-    print(f"Loaded {len(sources)} sources.")
 
-    # Dynamically determine today's date
-    today_date = datetime.datetime.now(datetime.timezone.utc).date()
-    yyyy_mm_dd = today_date.strftime("%Y-%m-%d")
-    yyyy_mm_dd_slash = today_date.strftime("%Y/%m/%d")
-    yyyymmdd = today_date.strftime("%Y%m%d")
-    yyyy = today_date.strftime("%Y")
-    print(f"Today's date is calculated as: {yyyy_mm_dd}")
+def scrape_article_page(url, fallback_title=''):
+    art_html = fetch_url(url)
+    if not art_html:
+        return None
+    t_match = re.search(r'<title[^>]*>(.*?)</title>', art_html)
+    title = clean_html(t_match.group(1)) if t_match else fallback_title
+    title = strip_title_suffix(title)
+    d_match = re.search(r'<meta name="description" content="(.*?)"', art_html)
+    desc = clean_html(d_match.group(1)) if d_match else ''
+    return title, desc
 
-    # We will gather articles by language
-    gathered = {
-        'en': [],
-        'de': [],
-        'fr': [],
-        'zh': []
-    }
 
-    # 1. English
-    print("\n--- GATHERING ENGLISH ---")
-    en_sources = [s for s in sources if s['language'] == 'en']
-    for s in en_sources:
-        sid = s['id']
-        if len(gathered['en']) >= TARGETS['en']:
+def gather_from_rss(sources, lang, target, bucket):
+    for s in sources:
+        if len(bucket) >= target:
             break
-        feed_url = RSS_FEEDS.get(sid)
-        if feed_url:
-            print(f"Fetching RSS for {sid}...")
-            xml_str = fetch_url(feed_url)
-            items = parse_rss(xml_str)
-            print(f"Found {len(items)} items.")
-            count = 0
-            for item in items:
-                if count >= 3:
-                    break
-
-                # To guarantee 100% clean paragraphs, we use the beautiful RSS description!
-                desc_p = clean_paragraph_content(item['desc'])
-                if not desc_p:
-                    desc_p = item['title']
-
-                gathered['en'].append({
-                    'source_id': sid,
-                    'title': item['title'],
-                    'description': item['desc'] or item['title'],
-                    'url': item['link'],
-                    'paragraphs': [desc_p]
-                })
-                count += 1
-                print(f"    Added. (Total EN: {len(gathered['en'])}/{TARGETS['en']})")
-                if len(gathered['en']) >= TARGETS['en']:
-                    break
-
-    # 2. German
-    print("\n--- GATHERING GERMAN ---")
-    de_sources = [s for s in sources if s['language'] == 'de']
-    for s in de_sources:
+        feed_url = s.get('rssUrl')
+        if not feed_url:
+            continue
         sid = s['id']
-        if len(gathered['de']) >= TARGETS['de']:
+        print(f"Fetching RSS for {sid}...")
+        xml_str = fetch_url(feed_url)
+        items = parse_rss(xml_str)
+        print(f"Found {len(items)} items.")
+        for item in items[:PER_SOURCE_LIMIT]:
+            bucket.append(make_article(sid, item['title'], item['desc'], item['link']))
+            print(f"    Added. (Total {lang.upper()}: {len(bucket)}/{target})")
+            if len(bucket) >= target:
+                break
+
+
+def scrape_la_presse(bucket, target):
+    if len(bucket) >= target:
+        return
+    print("Scraping La Presse...")
+    html_str = fetch_url('https://www.lapresse.ca/actualites/')
+    if not html_str:
+        return
+    links = set(re.findall(r'href="(https://www\.lapresse\.ca/actualites/[^"]+\.php)"', html_str))
+    print(f"Found {len(links)} La Presse links.")
+    for link in sorted(links)[:PER_SOURCE_LIMIT]:
+        scraped = scrape_article_page(link, fallback_title='Actualité La Presse')
+        if not scraped:
+            continue
+        title, desc = scraped
+        if not title:
+            title = 'Actualité La Presse'
+        bucket.append(make_article('la-presse', title, desc, link))
+        print(f"    Added La Presse article: {title[:50]}...")
+        if len(bucket) >= target:
             break
-        feed_url = RSS_FEEDS.get(sid)
-        if feed_url:
-            print(f"Fetching RSS for {sid}...")
-            xml_str = fetch_url(feed_url)
-            items = parse_rss(xml_str)
-            print(f"Found {len(items)} items.")
-            count = 0
-            for item in items:
-                if count >= 3:
-                    break
 
-                desc_p = clean_paragraph_content(item['desc'])
-                if not desc_p:
-                    desc_p = item['title']
 
-                gathered['de'].append({
-                    'source_id': sid,
-                    'title': item['title'],
-                    'description': item['desc'] or item['title'],
-                    'url': item['link'],
-                    'paragraphs': [desc_p]
-                })
-                count += 1
-                print(f"    Added. (Total DE: {len(gathered['de'])}/{TARGETS['de']})")
-                if len(gathered['de']) >= TARGETS['de']:
-                    break
+def extract_zh_links(sid, homepage_html, today):
+    yyyy = today.strftime('%Y')
+    yyyy_mm_dd = today.strftime('%Y-%m-%d')
+    yyyy_mm_dd_slash = today.strftime('%Y/%m/%d')
+    yyyymmdd = today.strftime('%Y%m%d')
 
-    # 3. French
-    print("\n--- GATHERING FRENCH ---")
-    fr_sources = [s for s in sources if s['language'] == 'fr']
-    for s in fr_sources:
+    if sid == 'xinhua':
+        return set(re.findall(r'href="(https?://www\.news\.cn/[^"]+c\.html)"', homepage_html))
+    if sid == 'people-cn':
+        return set(re.findall(
+            rf'href="(http://society\.people\.com\.cn/n1/{yyyy}/[^"]+\.html|http://finance\.people\.com\.cn/n1/{yyyy}/[^"]+\.html)"',
+            homepage_html,
+        ))
+    if sid == 'cctv-news':
+        return set(re.findall(
+            rf'href="(https?://news\.cctv\.com/{yyyy_mm_dd_slash}/[^"]+\.shtml)"',
+            homepage_html,
+        ))
+    if sid == 'lianhe-zaobao':
+        raw_links = set(re.findall(
+            rf'href="(/news/singapore/story{yyyymmdd}-[^"]+|/news/china/story{yyyymmdd}-[^"]+|/news/world/story{yyyymmdd}-[^"]+)"',
+            homepage_html,
+        ))
+        return ["https://www.zaobao.com.sg" + l for l in raw_links]
+    if sid == 'udn':
+        raw_links = set(re.findall(r'href="([^"]*story\d+/\d+)"', homepage_html))
+        return [l for l in raw_links if 'udn.com/news/story' in l]
+    if sid == 'ltn':
+        return set(re.findall(
+            r'href="(https://news\.ltn\.com\.tw/news/[a-z]+/breakingnews/\d+)"',
+            homepage_html,
+        ))
+    if sid == 'caixin':
+        return set(re.findall(
+            rf'href="(https://[a-z]+\.caixin\.com/{yyyy_mm_dd}/[^"]+\.html)"',
+            homepage_html,
+        ))
+    return []
+
+
+def gather_chinese(sources, target, bucket, today):
+    for s in sources:
+        if len(bucket) >= target:
+            break
         sid = s['id']
-        if len(gathered['fr']) >= TARGETS['fr']:
-            break
-        feed_url = RSS_FEEDS.get(sid)
-        if feed_url:
-            print(f"Fetching RSS for {sid}...")
-            xml_str = fetch_url(feed_url)
-            items = parse_rss(xml_str)
-            print(f"Found {len(items)} items.")
-            count = 0
-            for item in items:
-                if count >= 3:
-                    break
-
-                desc_p = clean_paragraph_content(item['desc'])
-                if not desc_p:
-                    desc_p = item['title']
-
-                gathered['fr'].append({
-                    'source_id': sid,
-                    'title': item['title'],
-                    'description': item['desc'] or item['title'],
-                    'url': item['link'],
-                    'paragraphs': [desc_p]
-                })
-                count += 1
-                print(f"    Added. (Total FR: {len(gathered['fr'])}/{TARGETS['fr']})")
-                if len(gathered['fr']) >= TARGETS['fr']:
-                    break
-        elif sid == 'la-presse':
-            print(f"Scraping La Presse...")
-            html_str = fetch_url('https://www.lapresse.ca/actualites/')
-            if html_str:
-                links = set(re.findall(r'href=\"(https://www\.lapresse\.ca/actualites/[^\"]+\.php)\"', html_str))
-                print(f"Found {len(links)} La Presse links.")
-                count = 0
-                for link in sorted(list(links))[:3]:
-                    art_html = fetch_url(link)
-                    if art_html:
-                        t_match = re.search(r'<title[^>]*>(.*?)</title>', art_html)
-                        d_match = re.search(r'<meta name=\"description\" content=\"(.*?)\"', art_html)
-                        title = clean_html(t_match.group(1)) if t_match else "Actualité La Presse"
-                        if " | " in title:
-                            title = title.split(" | ")[0].strip()
-                        desc = clean_html(d_match.group(1)) if d_match else ""
-
-                        desc_p = clean_paragraph_content(desc)
-                        if not desc_p:
-                            desc_p = title
-
-                        gathered['fr'].append({
-                            'source_id': sid,
-                            'title': title,
-                            'description': desc or title,
-                            'url': link,
-                            'paragraphs': [desc_p]
-                        })
-                        count += 1
-                        print(f"    Added La Presse article: {title[:50]}...")
-                        if len(gathered['fr']) >= TARGETS['fr']:
-                            break
-
-    # 4. Chinese
-    print("\n--- GATHERING CHINESE ---")
-    zh_sources = [s for s in sources if s['language'] == 'zh']
-    for s in zh_sources:
-        sid = s['id']
-        if len(gathered['zh']) >= TARGETS['zh']:
-            break
         print(f"Processing Chinese source {sid} ({s['url']})...")
         homepage_html = fetch_url(s['url'])
         if not homepage_html:
             continue
 
-        # Extract links
-        links = []
-        if sid == 'xinhua':
-            links = set(re.findall(r'href=\"(https?://www\.news\.cn/[^\"]+c\.html)\"', homepage_html))
-        elif sid == 'people-cn':
-            links = set(re.findall(rf'href=\"(http://society\.people\.com\.cn/n1/{yyyy}/[^\"]+\.html|http://finance\.people\.com\.cn/n1/{yyyy}/[^\"]+\.html)\"', homepage_html))
-        elif sid == 'cctv-news':
-            links = set(re.findall(rf'href=\"(https?://news\.cctv\.com/{yyyy_mm_dd_slash}/[^\"]+\.shtml)\"', homepage_html))
-        elif sid == 'lianhe-zaobao':
-            raw_links = set(re.findall(rf'href=\"(/news/singapore/story{yyyymmdd}-[^\"]+|/news/china/story{yyyymmdd}-[^\"]+|/news/world/story{yyyymmdd}-[^\"]+)\"', homepage_html))
-            links = ["https://www.zaobao.com.sg" + l for l in raw_links]
-        elif sid == 'udn':
-            raw_links = set(re.findall(r'href=\"([^\"]*story\d+/\d+)\"', homepage_html))
-            links = [l for l in raw_links if 'udn.com/news/story' in l]
-        elif sid == 'ltn':
-            links = set(re.findall(r'href=\"(https://news\.ltn\.com\.tw/news/[a-z]+/breakingnews/\d+)\"', homepage_html))
-        elif sid == 'caixin':
-            links = set(re.findall(rf'href=\"(https://[a-z]+\.caixin\.com/{yyyy_mm_dd}/[^\"]+\.html)\"', homepage_html))
-
+        links = extract_zh_links(sid, homepage_html, today)
         print(f"Found {len(links)} links for {sid}.")
-        count = 0
-        for link in list(links)[:3]:
-            art_html = fetch_url(link)
-            if art_html:
-                t_match = re.search(r'<title[^>]*>(.*?)</title>', art_html)
-                title = clean_html(t_match.group(1)) if t_match else ""
-                if " | " in title:
-                    title = title.split(" | ")[0].strip()
-                elif " - " in title:
-                    title = title.split(" - ")[0].strip()
-                elif "—" in title:
-                    title = title.split("—")[0].strip()
-                elif "_" in title:
-                    title = title.split("_")[0].strip()
+        for link in list(links)[:PER_SOURCE_LIMIT]:
+            scraped = scrape_article_page(link)
+            if not scraped:
+                continue
+            title, desc = scraped
+            if not title.strip():
+                print("    Skipping Chinese article with empty title.")
+                continue
+            bucket.append(make_article(sid, title, desc, link))
+            print(f"    Added Chinese article: {title[:30]}...")
+            if len(bucket) >= target:
+                break
 
-                if not title.strip():
-                    print("    Skipping Chinese article with empty title.")
-                    continue
 
-                d_match = re.search(r'<meta name=\"description\" content=\"(.*?)\"', art_html)
-                desc = clean_html(d_match.group(1)) if d_match else ""
-
-                desc_p = clean_paragraph_content(desc)
-                if not desc_p:
-                    desc_p = title
-
-                gathered['zh'].append({
-                    'source_id': sid,
-                    'title': title,
-                    'description': desc or title,
-                    'url': link,
-                    'paragraphs': [desc_p]
-                })
-                count += 1
-                print(f"    Added Chinese article: {title[:30]}...")
-                if len(gathered['zh']) >= TARGETS['zh']:
-                    break
-
-    # Save to Markdown
-    out_dir = f'src/content/news/{yyyy_mm_dd}'
+def write_stories(out_dir, gathered, sources_by_id, date):
     os.makedirs(out_dir, exist_ok=True)
 
-    # Clean output dir first to avoid stale/partially broken files
     for f in os.listdir(out_dir):
         if f.endswith('.md'):
             os.remove(os.path.join(out_dir, f))
@@ -427,7 +326,7 @@ def main():
                 "---",
                 f'title: "{title_escaped}"',
                 f'description: "{desc_escaped}"',
-                f"date: {yyyy_mm_dd}",
+                f"date: {date}",
                 f"continent: {src_info['continent']}",
                 f"country: {src_info['country']}",
                 f"language: {lang}",
@@ -435,7 +334,7 @@ def main():
                 f"source: {src_info['name']}",
                 f"sourceUrl: {item['url']}",
                 "---",
-                ""
+                "",
             ]
             for p in item['paragraphs']:
                 content_lines.append(p)
@@ -445,7 +344,35 @@ def main():
                 out_f.write("\n".join(content_lines))
             total_written += 1
 
+    return total_written
+
+
+def main():
+    sources = parse_sources('src/data/news-sources.yaml')
+    sources_by_id = {s['id']: s for s in sources}
+    print(f"Loaded {len(sources)} sources.")
+
+    today_date = datetime.datetime.now(datetime.timezone.utc).date()
+    yyyy_mm_dd = today_date.strftime("%Y-%m-%d")
+    print(f"Today's date is calculated as: {yyyy_mm_dd}")
+
+    gathered = {lang: [] for lang in TARGETS}
+
+    for lang in ('en', 'de', 'fr'):
+        print(f"\n--- GATHERING {lang.upper()} ---")
+        lang_sources = [s for s in sources if s['language'] == lang]
+        gather_from_rss(lang_sources, lang, TARGETS[lang], gathered[lang])
+
+    scrape_la_presse(gathered['fr'], TARGETS['fr'])
+
+    print("\n--- GATHERING CHINESE ---")
+    zh_sources = [s for s in sources if s['language'] == 'zh']
+    gather_chinese(zh_sources, TARGETS['zh'], gathered['zh'], today_date)
+
+    out_dir = f'src/content/news/{yyyy_mm_dd}'
+    total_written = write_stories(out_dir, gathered, sources_by_id, yyyy_mm_dd)
     print(f"\nDone! Successfully wrote {total_written} news stories.")
+
 
 if __name__ == '__main__':
     main()

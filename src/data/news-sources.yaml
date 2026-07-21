@@ -3,10 +3,12 @@
 # When gathering stories: use title + optional short description in the source language;
 # attribute `source` from this list’s `name`. Set `sourceUrl` to the concrete article URL,
 # not the outlet `url` below.
+# Optional `rssUrl` is used by jules/gather_news.py when an outlet has a usable feed.
 
 - id: bbc-news
   name: BBC News
   url: https://www.bbc.com/news
+  rssUrl: https://feeds.bbci.co.uk/news/world/rss.xml
   language: en
   languageName: English
   country: United Kingdom
@@ -15,6 +17,7 @@
 - id: the-guardian
   name: The Guardian
   url: https://www.theguardian.com/uk
+  rssUrl: https://www.theguardian.com/uk/rss
   language: en
   languageName: English
   country: United Kingdom
@@ -31,6 +34,7 @@
 - id: nytimes
   name: The New York Times
   url: https://www.nytimes.com/
+  rssUrl: https://rss.nytimes.com/services/xml/rss/nyt/World.xml
   language: en
   languageName: English
   country: United States
@@ -63,6 +67,7 @@
 - id: cbc-news
   name: CBC News
   url: https://www.cbc.ca/news
+  rssUrl: https://rss.cbc.ca/lineup/topstories.xml
   language: en
   languageName: English
   country: Canada
@@ -79,6 +84,7 @@
 - id: abc-australia
   name: ABC News
   url: https://www.abc.net.au/news
+  rssUrl: https://www.abc.net.au/news/feed/51120/rss.xml
   language: en
   languageName: English
   country: Australia
@@ -95,6 +101,7 @@
 - id: rnz
   name: RNZ
   url: https://www.rnz.co.nz/
+  rssUrl: https://www.rnz.co.nz/rss/news.xml
   language: en
   languageName: English
   country: New Zealand
@@ -103,6 +110,7 @@
 - id: rte
   name: RTÉ News
   url: https://www.rte.ie/news/
+  rssUrl: https://www.rte.ie/news/rss/news-headlines.xml
   language: en
   languageName: English
   country: Ireland
@@ -153,6 +161,7 @@
 - id: tagesschau
   name: tagesschau
   url: https://www.tagesschau.de/
+  rssUrl: https://www.tagesschau.de/xml/rss2/
   language: de
   languageName: German
   country: Germany
@@ -161,6 +170,7 @@
 - id: spiegel
   name: Der Spiegel
   url: https://www.spiegel.de/
+  rssUrl: https://www.spiegel.de/index.rss
   language: de
   languageName: German
   country: Germany
@@ -185,6 +195,7 @@
 - id: faz
   name: Frankfurter Allgemeine Zeitung
   url: https://www.faz.net/
+  rssUrl: https://www.faz.net/rss/aktuell/
   language: de
   languageName: German
   country: Germany
@@ -193,6 +204,7 @@
 - id: der-standard
   name: Der Standard
   url: https://www.derstandard.at/
+  rssUrl: https://www.derstandard.at/rss
   language: de
   languageName: German
   country: Austria
@@ -209,6 +221,7 @@
 - id: nzz
   name: Neue Zürcher Zeitung
   url: https://www.nzz.ch/
+  rssUrl: https://www.nzz.ch/recent.rss
   language: de
   languageName: German
   country: Switzerland
@@ -227,6 +240,7 @@
 - id: le-monde
   name: Le Monde
   url: https://www.lemonde.fr/
+  rssUrl: https://www.lemonde.fr/rss/une.xml
   language: fr
   languageName: French
   country: France
@@ -235,6 +249,7 @@
 - id: le-figaro
   name: Le Figaro
   url: https://www.lefigaro.fr/
+  rssUrl: https://www.lefigaro.fr/rss/figaro_actualites.xml
   language: fr
   languageName: French
   country: France
@@ -251,6 +266,7 @@
 - id: france24
   name: France 24
   url: https://www.france24.com/fr/
+  rssUrl: https://www.france24.com/fr/rss
   language: fr
   languageName: French
   country: France
@@ -259,6 +275,7 @@
 - id: franceinfo
   name: franceinfo
   url: https://www.francetvinfo.fr/
+  rssUrl: https://www.francetvinfo.fr/titres.rss
   language: fr
   languageName: French
   country: France
@@ -283,6 +300,7 @@
 - id: le-temps
   name: Le Temps
   url: https://www.letemps.ch/
+  rssUrl: https://www.letemps.ch/feed
   language: fr
   languageName: French
   country: Switzerland
